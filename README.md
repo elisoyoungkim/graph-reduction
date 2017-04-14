@@ -18,6 +18,6 @@ such nodes are considered indistinguishable and hence converted into a solid nod
 which nodes are eliminated. The proposed algorithm is partitioned into three phases. In the first phase, it finds the relevant subgraph of an input G if a source node vs and a target node vf in G. The second phases finds the cycles in G', if any, and reduce them into "solid" nodes in a disciplined way. This generate an acyclic graph G''. The last phase requires nodes reduction process in G''. It then computes the reachability value as ω(vs, vf ).
 
 ### PSEDOCODE
-![alt tag](https://cloud.githubusercontent.com/assets/22326212/25047357/3dc2ea34-2104-11e7-99bf-8a6931aa9529.png)
+![alt tag](https://cloud.githubusercontent.com/assets/22326212/25047406/7b25678a-2104-11e7-8a19-01c898316c12.png)
 
 #### Thesis Link: http://spectrum.library.concordia.ca/981891/1/Kim_MSc_F2016.pdf
