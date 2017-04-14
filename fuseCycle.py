@@ -28,7 +28,6 @@ def detect_cycle(path):
                     cycle.append(node)
     cyclic_paths_list = []
     [cyclic_paths_list.append(cycle) for cycle in set_of_cyclic_paths if set(cycle) not in cyclic_paths_list]
-    #print('clc', cyclic_paths_list)
     return cyclic_paths_list
 
 def start_end_in_SCCs(start, end):
@@ -37,27 +36,6 @@ def start_end_in_SCCs(start, end):
         start = end
     return start, end
 
-# def sort_cycle(all_paths, start, end):
-#     if len(all_paths) == 0:
-#         return []
-#     sorted_cycle = []
-#     # make a list of cycle paths
-#     [sorted_cycle.extend(detect_cycle(path)) for path in all_paths if detect_cycle(path) not in sorted_cycle]
-#     sorted_cycle_list = list(set(sorted_cycle))
-#     sorted_cycle_list.sort(key=len) # sort the list in an ascending order of the length
-#       
-#     cyclicPaths_list = []
-#     processing_duplicates = []
-#     # eliminate duplicates in cyclicPaths list
-#     [processing_duplicates.append(list(set(cycle))) for cycle in sorted_cycle_list if list(set(cycle)) not in processing_duplicates]
-#       
-#     for cycle in sorted_cycle_list:
-#         if list(set(cycle)) in processing_duplicates:
-#             cyclicPaths_list.append(cycle)
-#             del processing_duplicates[processing_duplicates.index(list(set(cycle)))]
-#     print 'm', cyclicPaths_list
-#     return reshape_cycles(cyclicPaths_list, start, end)
- 
 def sort_cycle(all_paths, start, end):
     if len(all_paths) is 0:
         return []
@@ -67,7 +45,6 @@ def sort_cycle(all_paths, start, end):
     cycle_list.sort(key=len) # sort the list in an ascending order of the length
     return reshape_cycles(cycle_list, start, end)
 
-
 def reshape_cycles(paths, start, end):
     # paths = all the elementary cycles in a graph
     reshaping_cycles = {}
@@ -76,7 +53,6 @@ def reshape_cycles(paths, start, end):
         return elementary_cycle_paths   
     [reshaping_cycles.setdefault(node, []) for node in list(set(reduce(lambda x,y:x+y, paths)))]
     for cycle in paths:
-        #print paths
         if start in cycle or end in cycle:
             if start in cycle and end in cycle:
                 reshaping_cycles[end].append(cycle)
@@ -96,14 +72,7 @@ def reshape_cycles(paths, start, end):
                 reshaping_cycles[key][reshaping_cycles[key].index((value))] = reshaped
             else:
                 continue
-#     if start or end in reshaping_cycles.keys():
-#         if end in reshaping_cycles.keys():
-#             temporary_list = [walk for walk in reshaping_cycles.get(end)]
-#         else:
-#             temporary_list = [walk for walk in reshaping_cycles.get(start)]
-#         elementary_cycle_paths.extend(temporary_list)    
-#     reshaping_cycles.pop(start, None)
-#     reshaping_cycles.pop(end, None)
+
     for value in reshaping_cycles.values():
         if len(value) is not 0:
             temporary_list = [walk for walk in value]
@@ -168,8 +137,6 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                 print '\n00',walk[0], walk[1]
                 updated_prob = calculate_probability([walk[0],walk[1]], [walk[1],walk[2]], mode, prob_table)
                 prob_table.update({walk[0]+walk[2]:updated_prob})
-                
-                #print 'Probability of {0}{1} is updated as w({0},{1}): {2}'.format(walk[0], walk[2], updated_prob)
                 empty_nodes_in_cycle_path.append(walk[1])
                 
             except IndexError:
@@ -179,7 +146,6 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
         print 'Probability of \"{0}{1}\" is updated as w({0},{1}): {2}.'.format(walk[0], walk[1], prob_table[walk[0]+walk[1]])
         if walk[0] not in cyclic_node_set:
             cyclic_node_set.append(walk[0])
-        #print 'updated', walk[0]+walk[1]
         for each_cycle in paths:
             vertex_index = 0
             for vertex in each_cycle:
@@ -189,7 +155,6 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                 vertex_index += 1
         fusing = []
         eliminate_duplicates = []
-        #print 'p', paths
         fused = True
         for each_cycle in paths:            
             fusing = map(itemgetter(0), groupby(each_cycle))
@@ -204,13 +169,10 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                 fused = False
             if len(fusing) > 2 and each_cycle not in eliminate_duplicates:
                 eliminate_duplicates.append(fusing)
-
         paths = eliminate_duplicates  
-
         # 1.replace a set of empty nodes in a cycle path with a single sold node 
         # 2.update probabilities in prob_table
         combined_node= walk[0]
-        #print '!!!!!!!', graph
         #print 'Empty nodes{0}'.format(empty_nodes_in_cycle_path)
         for key in graph.keys(): # walk[0] is a combined solid node
             graph.setdefault(key, [])
@@ -240,37 +202,18 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                 combined_succ = []
                 [combined_succ.append(node) for node in graph.get(combined_node) if node not in combined_succ]
                 graph.update({combined_node:combined_succ})
-                #graph.update({combined_node:list(set(graph.get(combined_node)))})
                 del graph[key]
                 
-                #print '**************',graph
-            # case 2: key in graph dictionary is a combined solid node
-            
+            # case 2: key in graph dictionary is a combined solid node            
             elif key == combined_node:
-                #print '====', graph
                 for node in empty_nodes_in_cycle_path:
                     if node in graph[key]:
                         graph[key].remove(node)
                         graph[key].append(combined_node)
-                         
-#                 try:
-#                     graph[key].remove(combined_node)
-#                 except ValueError:
-#                     pass
-                #print '$$$$$$$$$$$$$$$', graph.get(combined_node) 
-                #print graph
+
                 combined_succ = []
                 [combined_succ.append(node) for node in graph.get(combined_node) if node not in combined_succ]
                 graph.update({combined_node:combined_succ})
-                #print '@@@@@@@@@@@@@@@@'
-                #print graph
-                #graph.update({combined_node:list(set(graph.get(combined_node)))})
-                #updated_adj = []
-#                 for vertex in graph[key]:
-#                     if vertex not in empty_nodes_in_cycle_path:
-#                         updated_adj.append(vertex)
-#                 graph.update({combined_node:updated_adj})
-#                 print('Graph {0}:'.format(graph))
             # case 3: key in graph dictionary is neither a combined solid node nor a empty node
             elif key not in empty_nodes_in_cycle_path and key != combined_node:
                 deletion = []
@@ -279,46 +222,27 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                     if successor in empty_nodes_in_cycle_path:
                         deletion.append(successor)
                         addition.append(combined_node)
-                        #print 'Graph {0}:'.format(graph)
                         if key+combined_node in prob_table:
                             prob_table.update({key+combined_node:reduction_rules(2, prob_table[key+combined_node], prob_table[key+successor], mode)})
-                            #print 'Graph {0}:'.format(graph) 
                             print 'Probability of \"{0}{1}\" is updated as w({0},{1}): {2}.'.format(key, combined_node, prob_table[key+combined_node])
                         else:
                             prob_table.update({key+combined_node:prob_table[key+successor]})
-                            #print 'Graph {0}:'.format(graph)
                             print 'Probability of \"{2}{3}\" is updated as w({2},{3}): {4} from edge {0}{1}.'.format(key,successor, key,combined_node, prob_table[key+combined_node])
                 [graph[key].remove(succ) for succ in deletion if succ in graph[key]]
                 [graph[key].append(succ) for succ in addition]
-                
-#                 combined_succ = []
-#                 [combined_succ.append(node) for node in graph.get(combined_node) if node not in combined_succ]
-#                 graph.update({key:combined_succ})
                 graph.update({key:list(set(graph.get(key)))})
-        #print 'Paths', paths
         return paths
     def updated_paths(paths):
         
         while len(paths) is not 0:
-            print 'PATHS ==== ',paths
             changed = []
             paths = groupby_in_path(paths[0], paths)
             for path in paths:
                 if start in path and end in path:
                     if end != path[0]:
-                        #print('path:', path)
                         reshaped = reshape(end, path)
                         changed.append(reshaped)
-                        #print(changed)
-                        #print(reshaped)
-#                         if start+start in prob_table:
-#                             prob_table.update({end+end:prob_table[start+start]})
-#                             print('The probability of cycle edge {0}{0} is updated: {1} \n\n'.format(end, prob_table[end+end]))
-#                         
                     else:
-#                         if start+start in prob_table:
-#                             prob_table.update({end+end:prob_table[start+start]})
-#                             print('The probability of cycle edge {0}{0} is updated: {1} \n\n'.format(end, prob_table[end+end]))
                         changed.append(path)
                     
                 elif start in path or end in path:
@@ -341,7 +265,6 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                 if count > 2:
                     idx = []
                     [idx.append(x[0]) for x in list(enumerate(path)) if path[0] in x]
-                    #[idx.extend([x[0]]) for x in list(enumerate(path)) if path[0] in x]
                     print('index', idx)
                     for n in [[idx[y],idx[y+1]] for y in range(len(idx)-1)]:
                         print('n{0}'.format(n))
@@ -349,8 +272,7 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
                         print('temp{0}'.format(temp))
                         temp.extend([path[0]])
                         slicing.append(temp)
-                        print('slicing', slicing)
-                        
+                        print('slicing', slicing)   
                 else:
                     slicing.append(path)
                 print('slicing', slicing)
@@ -358,25 +280,17 @@ def fuse_cycle(path, graph, start, end, mode, prob_table):
             [paths.append(path) for path in slicing if path not in paths]
             print(paths)
             paths = slicing
-            
             print(slicing)
-            print('paths {0}'.format(paths))   
-  
-                    
+            print('paths {0}'.format(paths))        
         return paths
     updated_paths(path)
-    #print(graph)
-    #print 'cnodeset',cyclic_node_set
     for cycle_vertex in cyclic_node_set:
         if cycle_vertex in graph.keys() and cycle_vertex in graph[cycle_vertex]:
             graph[cycle_vertex].remove(cycle_vertex)
-            #print graph
-    #[graph[cycle_vertex[0]].remove(cycle_vertex[0]) for cycle_vertex in cyclic_node_set if cycle_vertex[0] in graph.keys() and cycle_vertex[0] in graph[cycle_vertex[0]]]
-
     return graph
 
 def reshape(vertex, path):
-    reshaped = path[path.index(vertex,0):]+path[1:path.index(vertex,0)]
+    reshaped = path[path.index(vertex,0):]+path[1:path.index(vertex, 0)]
     reshaped.append(vertex)
     return reshaped
 

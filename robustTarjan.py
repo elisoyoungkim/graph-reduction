@@ -1,23 +1,22 @@
-""" The Strongly Connected Components of a directed graph are subsets of nodes such that each node within a subset
-    can be reached from each other node. Tarjan's algorithm can identify these components efficiently"""
-
+"""
+The Strongly Connected Components of a directed graph are subsets of nodes
+such that each node within a subset can be reached from each other node.
+Tarjan's algorithm can identify these components efficiently
+"""
 from pyswip import *
 from random import choice
 from pyswip import Functor, Variable, Query
 import networkx as nx
 
+# find the strongly connected components in a graph using Tarjan's algorithm.
+# graph should be a dictionary mapping node names to lists of successor nodes.
 def strongly_connected_components(graph):
-    """ Find the strongly connected components in a graph using Tarjan's algorithm.
-        graph should be a dictionary mapping node names to lists of successor nodes."""
-    
-    result = [ ]
-    stack = [ ]
-    low = { }
-    selfloop = []   
+    result = []
+    stack = []
+    low = {}
+    selfloop = []
     def visit(node):
         if node in low: return
-        
-        
         num = len(low)
         low[node] = num
         stack_pos = len(stack)
@@ -27,31 +26,28 @@ def strongly_connected_components(graph):
                 selfloop.append(node)
             visit(successor)
             low[node] = min(low[node], low[successor])
-        
+
         if num == low[node]:
             component = tuple(stack[stack_pos:])
             del stack[stack_pos:]
             result.append(component)
             for item in component:
                 low[item] = len(graph)
-    
+
     for node in graph:
         visit(node)
-    
+
     return (result, selfloop)
 
-
 def topological_sort(graph):
-    count = { }
+    count = {}
     for node in graph:
         count[node] = 0
     for node in graph:
         for successor in graph[node]:
             count[successor] += 1
-
-    ready = [ node for node in graph if count[node] == 0 ]
-    
-    result = [ ]
+    ready = [node for node in graph if count[node] == 0]
+    result = []
     while ready:
         node = ready.pop(-1)
         result.append(node)
@@ -62,21 +58,19 @@ def topological_sort(graph):
                 ready.append(successor)
     return result
 
-
 def robust_topological_sort(graph):
-    """ First identify strongly connected components,
-        then perform a topological sort on these components. """
-
+    # first identify strongly connected components,
+    # then perform a topological sort on these components.
     (components, selfloop) = strongly_connected_components(graph)
 
-    node_component = { }
+    node_component = {}
     for component in components:
         for node in component:
             node_component[node] = component
 
-    component_graph = { }
+    component_graph = {}
     for component in components:
-        component_graph[component] = [ ]
+        component_graph[component] = []
     
     for node in graph:
         node_c = node_component[node]
@@ -93,9 +87,7 @@ def get_reduced_graph(component_graph, scc):
     for component in scc:
         solid_node = []
         solid_node.append('ps' + str(scc.index(component)))
-        #print solid_node
         scc_dict.update({tuple(solid_node):list(component)})
-        #print 'I need to know',component_graph[component], '\n', scc_dict
 
         component_graph.update({tuple(solid_node):component_graph[component]})
         for node in component_graph:
@@ -104,7 +96,6 @@ def get_reduced_graph(component_graph, scc):
                 component_graph[node].append(tuple(solid_node))
         del component_graph[component]
     return (component_graph, scc_dict)
-
 
 def transitive_closure_nx(graph):
     def generate_edges(graph):
@@ -159,10 +150,8 @@ def transitive_closure_of_edges(graph):
 
     for link in gen_edges:
         print link[0], link[1]
-        call(assertz(edge(link[0],link[1])))
+        call(assertz(edge(link[0], link[1])))
     # construct look up tables of common facts 
-    
-
     paths = list(p.query('path(X,Y)'))
 
     tc_edges = []
@@ -171,7 +160,6 @@ def transitive_closure_of_edges(graph):
             tc_edges.append((edge['X'], edge['Y']))
 
     return tc_edges
-
 #     print robust_topological_sort(graph)
 #     scc = [x for x in robust_topological_sort(graph) if len(x)>1] 
 #     print scc
