@@ -1,4 +1,4 @@
-# Title:  On the Semantics of Queries over Graphs with Uncertainty
+# On the Semantics of Queries over Graphs with Uncertainty
 
 ## ABSTRACT
 
